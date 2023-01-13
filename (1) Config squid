@@ -1,0 +1,60 @@
+- Installasi Proxy
+root@srv1:~# apt install squid
+
+- Config Proxy Squid
+root@srv1:~# nano /etc/squid/squid.conf
+# Recommended minimum Access Permission configuration:      #line 1395
+#
+# Deny requests to certain unsafe ports
+http_access deny !Safe_ports
+
+# Deny CONNECT to other than secure SSL ports
+http_access deny CONNECT !SSL_ports
+
+# Only allow cachemgr access from localhost
+http_access allow localhost manager
+http_access deny manager
+acl mynet src 10.23.0.0/22			#sesuaikan dengan ip gateway kalian
+
+# We strongly recommend the following be uncommented to protect innocent
+# web applications running on the proxy server who think the only
+# one who can access services on "localhost" is a local user
+#http_access deny to_localhost
+
+#
+# INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS
+#
+include /etc/squid/conf.d/*
+
+# Example rule allowing access from your local networks.
+# Adapt localnet in the ACL section to list your (internal) IP networks
+# from where browsing should be allowed
+#http_access allow localnet
+http_access allow localhost
+http_access allow mynet				# jangan lupa arahkan mynet kalian
+
+# And finally deny all other access to this proxy
+http_access deny all
+
+didalam file yang sama, definisikan dns server yang kalian sedang pakai.
+
+#  TAG: dns_nameservers
+#       Use this if you want to specify a list of DNS name servers
+#       (IP addresses) to use instead of those given in your
+#       /etc/resolv.conf file.
+#
+#       On Windows platforms, if no value is specified here or in
+#       the /etc/resolv.conf file, the list of DNS name servers are
+#       taken from the Windows registry, both static and dynamic DHCP
+#       configurations are supported.
+#
+#       Example: dns_nameservers 10.0.0.1 192.172.0.4
+#Default:
+# Use operating system definitions
+dns_nameservers 8.8.8.8 8.8.4.4			# tambahkan jga ip dns nya
+
+
+- Reload proxy
+root@srv1:~# systemctl reload squid.service.
+
+-Test Proxy dengan Browsing+aktifkan proxy
